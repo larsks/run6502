@@ -1,24 +1,25 @@
+EXIT     = $f000
 PUTC     = $f001
 EOF      = $f002
 GETC     = $f004
 
-another:
-        lda EOF
+get_next_char:
+        lda EOF                 ; check if we've reached the end of input
         bne end
 
-        lda GETC
-        beq another
+        lda GETC                ; get next character
+        beq get_next_char       ; try again if no char available
 
 check_dot:
-        cmp #$2e        ; exit on '.' at beginning of line.
+        cmp #$2e                ; check if we read a '.'
         bne check_eol
 
-        ldx #1
+        ldx #1                  ; check if previous char was eol
         cpx last_was_eol
-        beq end
+        beq end                 ; exit if we see '.' at beginning of line
 
 check_eol:
-        cmp #$0d        ; check if we received <cr>
+        cmp #$0d                ; check if we received <cr>
         bne not_eol
         ldx #1
         stx last_was_eol
@@ -30,18 +31,19 @@ not_eol:
         stx last_was_eol
 
 print:
-        cmp #$40        ; don't swap chars before 'A'
+        cmp #$40                ; don't swap chars before 'A'
         bcc noswap
-        cmp #$7b        ; don't swap chars after 'z'
+        cmp #$7b                ; don't swap chars after 'z'
         bcs noswap
-        eor #$20        ; swap upper and lower case as a demo
+        eor #$20                ; swap upper and lower case as a demo
 
 noswap:
         sta PUTC
-        jmp another
+        jmp get_next_char
 
 end:
-        brk
+        lda #0
+        sta EXIT
 
 last_was_eol:
         .byte 0

@@ -22,6 +22,7 @@ void exec6502(uint32_t tickcount);
 void step6502();
 
 #define RUN6502_MAGIC "RN65"
+#define ADDR_EXIT 0xf000
 #define ADDR_PUTC 0xf001
 #define ADDR_GETC 0xf004
 #define ADDR_EOF  0xf002
@@ -68,6 +69,8 @@ uint8_t read6502(uint16_t address)
 void write6502(uint16_t address, uint8_t value)
 {
     switch (address) {
+        case ADDR_EXIT:
+            exit(value);
         case ADDR_PUTC:
             mm_putc(value);
 
@@ -142,8 +145,6 @@ int main(int argc, const char* argv[])
     for (;;)    
     {
         exec6502(1);
-
-        if (status & FLAG_INTERRUPT) break;
     }
 
     return 0;
