@@ -1,12 +1,9 @@
 EXIT     = $f000
 STDIN    = $f001
-EOF      = $f002
 
 get_next_char:
-        lda EOF                 ; check if we've reached the end of input
-        bne end
-
         lda STDIN               ; get next character
+        bvs end                 ; exit on EOF
         beq get_next_char       ; try again if no char available
 
 check_dot:

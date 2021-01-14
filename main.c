@@ -28,14 +28,17 @@ struct option longopts[] = {
     {0, 0, 0, 0}
 };
 
+/*
+ * read a character from stdin. Set overflow flag on EOF.
+ */
 uint8_t mm_getc() {
     unsigned int ch = getchar();
 
     if (ch == EOF) {
-        ateof = 1;
+        status |= FLAG_OVERFLOW;
         ch = 0;
     } else {
-        ateof = 0;
+        status &= ~FLAG_OVERFLOW;
     }
 
     return ch;
@@ -51,9 +54,6 @@ uint8_t read6502(uint16_t address)
         fprintf(stderr, "R: %x\n", address);
 
     switch (address) {
-        case ADDR_EOF:
-            return ateof;
-
         case ADDR_STDIN:
             return mm_getc();
 
