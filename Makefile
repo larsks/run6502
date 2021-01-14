@@ -1,3 +1,8 @@
+prefix = /usr
+bindir = $(prefix)/bin
+
+INSTALL = install
+
 OBJS = \
        main.o \
        fake6502.o
@@ -11,3 +16,6 @@ run6502: $(OBJS)
 
 clean:
 	rm -f $(OBJS)
+
+install: all
+	$(INSTALL) -m 755 run6502 $(DESTDIR)$(bindir)/
