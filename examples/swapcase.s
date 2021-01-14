@@ -1,8 +1,8 @@
 EXIT     = $f000
-STDIN    = $f001
+STDIO    = $f001
 
 get_next_char:
-        lda STDIN               ; get next character
+        lda STDIO               ; get next character
         bvs end                 ; exit on EOF
         beq get_next_char       ; try again if no char available
 
@@ -34,11 +34,11 @@ print:
         eor #$20                ; swap upper and lower case as a demo
 
 noswap:
-        sta STDIN
+        sta STDIO
         jmp get_next_char
 
 end:
-        lda #0
+        lda #0                  ; exit with status 0
         sta EXIT
 
 last_was_eol:
