@@ -15,8 +15,16 @@
 extern uint16_t pc;
 extern uint8_t sp, a, x, y, status;
 
-extern void reset6502();
+void push16(uint16_t pushval);
+void push8(uint8_t pushval);
+uint16_t pull16(void);
+uint8_t pull8(void);
+void reset6502(void);
+void nmi6502(void);
+void irq6502(void);
 void exec6502(uint32_t tickcount);
-void step6502();
+void step6502(void);
+void hookexternal(void *funcptr);
 
 #endif
+
