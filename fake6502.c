@@ -114,7 +114,7 @@
                      //CPU in the Nintendo Entertainment System does not
                      //support BCD operation.
 
-#include "flags.h"
+#include "fake6502.h"
 
 #define BASE_STACK     0x100
 
