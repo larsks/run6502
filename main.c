@@ -17,8 +17,6 @@ char *exe_path, *exe_name;
 
 void cfmakeraw(struct termios *termios_p);
 
-int ateof = 0;
-
 struct termios saved_termios;
 struct settings settings = {0};
 struct option longopts[] = {
@@ -27,6 +25,9 @@ struct option longopts[] = {
     {"start-addr", 1, NULL, OPT_START_ADDR},
     {0, 0, 0, 0}
 };
+
+int wrapped_argc;
+const char **wrapped_argv;
 
 /*
  * read a character from stdin. Set overflow flag on EOF.
@@ -50,32 +51,59 @@ void mm_putc(uint8_t value) {
 
 uint8_t read6502(uint16_t address)
 {
-    if (settings.verbose > 1)
-        fprintf(stderr, "R: %x\n", address);
+    int i;
+    int res = 0;
 
     switch (address) {
-        case ADDR_STDIN:
-            return mm_getc();
+        case ADDR_ARGC:
+            res = wrapped_argc;
+            break;
+
+        case ADDR_EXIT:
+            exit(0);
+
+        case ADDR_STDIO:
+            res = mm_getc();
+            break;
 
         default:
-            return s_memory6502[address];
+            res = s_memory6502[address];
+            break;
     }
+
+    if (settings.verbose > 1)
+        fprintf(stderr, "R: %x -> %x\r\n", address, res);
+
+    return res;
+
 }
 
 void write6502(uint16_t address, uint8_t value)
 {
     if (settings.verbose > 1)
-        fprintf(stderr, "W: %x %x\n", address, value);
+        fprintf(stderr, "W: %x %x (%c)\r\n", address, value, value);
+
     switch (address) {
         case ADDR_EXIT:
             exit(value);
-        case ADDR_STDIN:
+
+        case ADDR_STDIO:
             mm_putc(value);
             break;
 
-        default:
-            s_memory6502[address] = value;
+        case ADDR_ARGV:
+            if (value < wrapped_argc) {
+                if (settings.verbose > 1)
+                    fprintf(stderr, "request arg: %d\r\n", value);
+
+                strncpy(&s_memory6502[ADDR_ARGV_BASE],
+                        wrapped_argv[value],
+                        MAX_ARG_LENGTH);
+            }
+            break;
     }
+
+    s_memory6502[address] = value;
 }
 
 void reset_term() {
@@ -165,7 +193,7 @@ int main(int argc, const char* argv[])
     size = ftell(f);
     fseek(f, 0, SEEK_SET);
 
-    if (size >= 65535) {
+    if (size >= 0xFFFF) {
         fprintf(stderr, "%s: image too large (max. size 65k)\n", exe_name);
         return 1;
     }
@@ -182,6 +210,14 @@ int main(int argc, const char* argv[])
             load_addr = hdr.load_addr;
         }
     }
+
+    optind++;
+
+    wrapped_argc = argc-optind;
+    wrapped_argv = &argv[optind];
+
+    if (settings.verbose > 1)
+        fprintf(stderr, "wrapped_argc = %d\n", wrapped_argc);
 
     if (settings.start_addr_set) {
         start_addr = settings.start_addr;
@@ -202,7 +238,7 @@ int main(int argc, const char* argv[])
 
     for (;;)    
     {
-        exec6502(1);
+        step6502();
     }
 
     return 0;
