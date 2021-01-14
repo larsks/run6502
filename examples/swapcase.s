@@ -1,13 +1,12 @@
 EXIT     = $f000
-PUTC     = $f001
+STDIN    = $f001
 EOF      = $f002
-GETC     = $f004
 
 get_next_char:
         lda EOF                 ; check if we've reached the end of input
         bne end
 
-        lda GETC                ; get next character
+        lda STDIN               ; get next character
         beq get_next_char       ; try again if no char available
 
 check_dot:
@@ -38,7 +37,7 @@ print:
         eor #$20                ; swap upper and lower case as a demo
 
 noswap:
-        sta PUTC
+        sta STDIN
         jmp get_next_char
 
 end:
