@@ -55,6 +55,9 @@ void mm_putc(uint8_t value) {
 }
 
 void mm_closedir() {
+    if (settings.verbose > 0)
+        fprintf(stderr, "closing directory\r\n");
+
     closedir(ctx.dir);
     ctx.dir = NULL;
     ctx.dirop = 0;
@@ -117,6 +120,11 @@ uint8_t mm_get_dirent() {
 }
 
 void read_next_dirent() {
+    if (! ctx.dir) {
+        fprintf(stderr, "WARNING: read from closed directory\r\n");
+        return;
+    }
+
     ctx.cur_dirent = readdir(ctx.dir);
     if (settings.verbose > 0) {
         if (ctx.cur_dirent) {
@@ -130,15 +138,6 @@ void read_next_dirent() {
 }
 
 void mm_diropt(uint8_t value) {
-    char path[MAX_STRING_LENGTH+1] = {0};
-
-    strncpy((char *)path,
-            &s_memory6502[ADDR_STRING_BASE],
-            MAX_STRING_LENGTH);
-
-    if (settings.verbose > 0)
-        fprintf(stderr, "diropt %c path %s\r\n", value, path);
-
     if (ctx.dirop && value != ctx.dirop && value != 'X') {
         fprintf(stderr, "ERROR: directory operation in progress\n");
         exit(1);
@@ -154,6 +153,15 @@ void mm_diropt(uint8_t value) {
                 break;
         }
     } else {
+        char path[MAX_STRING_LENGTH+1] = {0};
+
+        strncpy((char *)path,
+                &s_memory6502[ADDR_STRING_BASE],
+                MAX_STRING_LENGTH);
+
+        if (settings.verbose > 0)
+            fprintf(stderr, "diropt %c path %s\r\n", value, path);
+
         switch (value) {
             case 'L':
                 ctx.dir = opendir(path);
