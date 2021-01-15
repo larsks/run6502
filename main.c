@@ -15,6 +15,7 @@
 uint8_t* s_memory6502;
 char *exe_path, *exe_name;
 
+// described in man page but no prototype in termios.h
 void cfmakeraw(struct termios *termios_p);
 
 struct termios saved_termios;
@@ -45,6 +46,9 @@ uint8_t mm_getc() {
     return ch;
 }
 
+/*
+ * write a character to stdout.
+ */
 void mm_putc(uint8_t value) {
     putchar(value);
 }
@@ -81,7 +85,7 @@ uint8_t read6502(uint16_t address)
 void write6502(uint16_t address, uint8_t value)
 {
     if (settings.verbose > 1)
-        fprintf(stderr, "W: %x %x (%c)\r\n", address, value, value);
+        fprintf(stderr, "W: %x -> %x\r\n", value, address);
 
     switch (address) {
         case ADDR_EXIT:
@@ -203,8 +207,11 @@ int main(int argc, const char* argv[])
 
         fread(&hdr, sizeof(struct header), 1, f);
         if (memcmp(hdr.signature, RUN6502_MAGIC, 4) != 0) {
+            fprintf(stderr, "warning: %s is not an r65 file\n", argv[optind]);
             fseek(f, 0, SEEK_SET);
         } else {
+            if (settings.verbose > 0)
+                fprintf(stderr, "reading r65 header\n");
             start_addr = hdr.start_addr;
             start_addr_set = 1;
             load_addr = hdr.load_addr;
@@ -216,9 +223,6 @@ int main(int argc, const char* argv[])
     wrapped_argc = argc-optind;
     wrapped_argv = &argv[optind];
 
-    if (settings.verbose > 1)
-        fprintf(stderr, "wrapped_argc = %d\n", wrapped_argc);
-
     if (settings.start_addr_set) {
         start_addr = settings.start_addr;
         start_addr_set = 1;
@@ -226,6 +230,12 @@ int main(int argc, const char* argv[])
 
     if (settings.load_addr_set)
         load_addr = settings.load_addr;
+
+    if (settings.verbose > 1) {
+        fprintf(stderr, "load_addr = %x\n", load_addr);
+        fprintf(stderr, "start_addr = %x\n", start_addr);
+        fprintf(stderr, "wrapped_argc = %d\n", wrapped_argc);
+    }
 
     fread(s_memory6502 + load_addr, 1, size, f);
     fclose(f);
