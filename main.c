@@ -20,6 +20,7 @@ void cfmakeraw(struct termios *termios_p);
 
 struct termios saved_termios;
 struct settings settings = {0};
+struct context ctx = {0};
 struct option longopts[] = {
     {"verbose",    0, NULL, OPT_VERBOSE},
     {"load-addr",  1, NULL, OPT_LOAD_ADDR},
@@ -53,6 +54,116 @@ void mm_putc(uint8_t value) {
     putchar(value);
 }
 
+void mm_closedir() {
+    closedir(ctx.dir);
+    ctx.dir = NULL;
+    ctx.dirop = 0;
+    ctx.cur_dirent = NULL;
+}
+
+uint8_t dtype_to_char(char dtype) {
+    uint8_t ch;
+
+    switch (dtype) {
+        case DT_BLK:
+            ch = 'B';
+            break;
+        case DT_CHR:
+            ch = 'C';
+            break;
+        case DT_DIR:
+            ch = 'D';
+            break;
+        case DT_FIFO:
+            ch = 'F';
+            break;
+        case DT_LNK:
+            ch = 'L';
+            break;
+        case DT_REG:
+            ch = 'R';
+            break;
+        case DT_SOCK:
+            ch = 'S';
+            break;
+        case DT_UNKNOWN:
+            ch = '?';
+            break;
+    }
+
+    return ch;
+}
+
+uint8_t mm_get_dirent() {
+    uint8_t dtype;
+
+    if (! ctx.dir) {
+        return 0;
+    }
+
+    dtype = dtype_to_char(ctx.cur_dirent->d_type);
+
+    if (settings.verbose > 0)
+        fprintf(stderr, "return entry for %s [%c]\r\n",
+                ctx.cur_dirent->d_name,
+                dtype
+                );
+
+    strncpy(&s_memory6502[ADDR_STRING_BASE], 
+            ctx.cur_dirent->d_name,
+            MAX_STRING_LENGTH);
+
+    return dtype;
+}
+
+void read_next_dirent() {
+    ctx.cur_dirent = readdir(ctx.dir);
+    if (settings.verbose > 0) {
+        if (ctx.cur_dirent) {
+            fprintf(stderr, "read entry for %s\r\n", ctx.cur_dirent->d_name);
+        } else {
+            fprintf(stderr, "read final directory entry\r\n");
+        }
+    }
+    if (ctx.cur_dirent == NULL)
+        mm_closedir();
+}
+
+void mm_diropt(uint8_t value) {
+    char path[MAX_STRING_LENGTH+1] = {0};
+
+    strncpy((char *)path,
+            &s_memory6502[ADDR_STRING_BASE],
+            MAX_STRING_LENGTH);
+
+    if (settings.verbose > 0)
+        fprintf(stderr, "diropt %c path %s\r\n", value, path);
+
+    if (ctx.dirop && value != ctx.dirop && value != 'X') {
+        fprintf(stderr, "ERROR: directory operation in progress\n");
+        exit(1);
+    }
+
+    if (ctx.dirop) {
+        switch (value) {
+            case 'X':
+                mm_closedir();
+                break;
+            case 'L':
+                read_next_dirent();
+                break;
+        }
+    } else {
+        switch (value) {
+            case 'L':
+                ctx.dir = opendir(path);
+                ctx.dirop = 'L';
+                read_next_dirent();
+                break;
+        }
+    }
+}
+
 uint8_t read6502(uint16_t address)
 {
     int i;
@@ -68,6 +179,10 @@ uint8_t read6502(uint16_t address)
 
         case ADDR_STDIO:
             res = mm_getc();
+            break;
+
+        case ADDR_DIRENT_TYPE:
+            res = mm_get_dirent();
             break;
 
         default:
@@ -88,6 +203,10 @@ void write6502(uint16_t address, uint8_t value)
         fprintf(stderr, "W: %x -> %x\r\n", value, address);
 
     switch (address) {
+        case ADDR_DIROPT:
+            mm_diropt(value);
+            break;
+
         case ADDR_EXIT:
             exit(value);
 
@@ -100,9 +219,9 @@ void write6502(uint16_t address, uint8_t value)
                 if (settings.verbose > 1)
                     fprintf(stderr, "request arg: %d\r\n", value);
 
-                strncpy(&s_memory6502[ADDR_ARGV_BASE],
+                strncpy(&s_memory6502[ADDR_STRING_BASE],
                         wrapped_argv[value],
-                        MAX_ARG_LENGTH);
+                        MAX_STRING_LENGTH);
             }
             break;
     }
