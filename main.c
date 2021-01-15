@@ -309,7 +309,7 @@ int main(int argc, const char* argv[])
 
     if ((argc-optind) < 1)
     {
-        fprintf(stderr, "%s: usage: %s image.bin\n", exe_name, exe_name);
+        usage(stderr);
         return 2;
     }
 
