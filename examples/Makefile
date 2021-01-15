@@ -1,23 +1,25 @@
 LD65 = ld65
 CA65 = ca65
 
-PRGS = swapcase clioptions
+PRGS = \
+       swapcase.r65 \
+       clioptions.r65 \
+       ls65.r65 \
+       stringtable.r65
 
-%.bin %.lst: %.o
-	$(LD65)  -C run6502.cfg -o $@ $<
+BINS = $(PRGS:.r65=.bin)
+
+%.bin: %.o
+	$(LD65) -t none -o $@ $<
+
+%.r65: %.o
+	$(LD65)  $(LD65FLAGS) -C run6502.cfg -o $@ header.o $<
+	chmod 755 $@
 
  %.o: %.s
 	$(CA65) -t none -o $@ -l $(@:.o=.lst) $<
 
 all: $(PRGS)
 
-swapcase: header.o swapcase.o
-	$(LD65)  $(LD65FLAGS) -C run6502.cfg -o $@ header.o swapcase.o
-	chmod 755 $@
-
-clioptions: header.o clioptions.o
-	$(LD65)  $(LD65FLAGS) -C run6502.cfg -o $@ header.o clioptions.o
-	chmod 755 $@
-
 clean:
-	rm -f $(PRGS) $(OBJS) $(LSTS)
+	rm -f $(PRGS) $(OBJS) $(LSTS) $(BINS)
