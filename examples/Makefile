@@ -9,6 +9,10 @@ PRGS = \
 
 BINS = $(PRGS:.r65=.bin)
 
+SRCS = $(wildcard *.s)
+OBJS = $(SRCS:.s=.o)
+LSTS = $(SRCS:.s=.lst)
+
 %.bin: %.o
 	$(LD65) $(LD65FLAGS) -t none -o $@ $<
 
