@@ -57,8 +57,8 @@ continue:       tax                     ; move value to x register for indexing
 ; @return none
 println:        ldy #0
 @loop:          lda (addrlo),y
-                sta STDIO
                 beq @end                ; exit on termintal 0 
+                sta STDIO
                 iny
                 jmp @loop
                
