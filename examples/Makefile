@@ -10,14 +10,14 @@ PRGS = \
 BINS = $(PRGS:.r65=.bin)
 
 %.bin: %.o
-	$(LD65) -t none -o $@ $<
+	$(LD65) $(LD65FLAGS) -t none -o $@ $<
 
 %.r65: %.o
 	$(LD65)  $(LD65FLAGS) -C run6502.cfg -o $@ header.o $<
 	chmod 755 $@
 
  %.o: %.s
-	$(CA65) -t none -o $@ -l $(@:.o=.lst) $<
+	$(CA65) $(CA65FLAGS) -t none -o $@ -l $(@:.o=.lst) $<
 
 all: $(PRGS)
 
