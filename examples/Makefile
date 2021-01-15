@@ -16,7 +16,7 @@ LSTS = $(SRCS:.s=.lst)
 %.bin: %.o
 	$(LD65) $(LD65FLAGS) -t none -o $@ $<
 
-%.r65: %.o
+%.r65: %.o header.o
 	$(LD65)  $(LD65FLAGS) -C run6502.cfg -o $@ header.o $<
 	chmod 755 $@
 
