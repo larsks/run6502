@@ -1,6 +1,9 @@
-EXIT  = $f000
 STDIO = $f001
 ARGC  = $f002
+
+; run6502 supports the 65816 stp instruction
+; to cause the simulator to exit
+.DEFINE stp .byte $DB
 
 .ZEROPAGE
 
@@ -11,8 +14,7 @@ addrhi:         .byte 0
 
                 lda ARGC
                 jsr strerror
-                lda #0
-                sta EXIT
+                stp
 
 strerror:       asl a
                 tax
