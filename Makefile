@@ -10,7 +10,7 @@ SRCS = \
 DEPS = $(SRCS:.c=.d)
 OBJS = $(SRCS:.c=.o)
 
-CFLAGS = -g
+CFLAGS = -g3
 
 # from https://www.gnu.org/software/make/manual/html_node/Automatic-Prerequisites.html
 %.d: %.c
