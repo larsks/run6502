@@ -75,3 +75,8 @@ support for the 65816 `phx/phy/plx/ply` opcodes.
 | 4 bytes            | 2 bytes      | 2 bytes       |
 +--------------------+--------------+---------------+----...
 ```
+
+## Demos
+
+[![asciicast](https://asciinema.org/a/384815.svg)](https://asciinema.org/a/384815)
+
