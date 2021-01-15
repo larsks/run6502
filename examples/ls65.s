@@ -18,33 +18,53 @@ addrhi: .byte 0
 
 .CODE
 
-        ; TODO: only lists "."; need to add code to accept
-        ; pathname on command line.
-        lda #'.'
-        sta STRING_BASE
-loop:   lda #'L'
-        sta DIROPT
-        lda DTYPE
-        beq end                 ; exit if we have read last dir entry
-        sta STDIO               ; write dtype to stdout
-        lda #' '
-        sta STDIO
+        ldx #0
+        cpx ARGC                        ; check if there are any arguments
+        bne args                        ; loop over arguments if available
 
-        lda #<STRING_BASE        ; load name into addrlo + addrhi
+        lda #'.'                        ; default to listing '.' if no args
+        sta STRING_BASE
+        dex                             ; inx at bottom of loop will set x=0
+        jmp printd
+
+args:   cpx ARGC                        ; check if there are any more arguments
+        beq end
+        stx ARGV                        ; request the next argument
+
+printd: lda #<STRING_BASE               ; load name into addrlo + addrhi
         sta addrlo
         lda #>STRING_BASE
         sta addrhi
+        jsr println
 
-        jsr println             ; print name + eol
-        jmp loop
+dirent: lda #'L'
+        sta DIROPT                      ; request directory listing
+        lda DTYPE                       ; read d_type of next entry
+                                        ; (places d_name into STRING_BASE)
+        beq next                        ; exit if we have read last dir entry
+        sta STDIO                       ; write dtype to stdout
+        lda #' '
+        sta STDIO
+
+        lda #<STRING_BASE               ; load name into addrlo + addrhi
+        sta addrlo
+        lda #>STRING_BASE
+        sta addrhi
+        jsr println                     ; print name + eol
+
+        jmp dirent
+
+next:
+        inx
+        jmp args                        ; process next argument
 
 end:
-        stp
+        stp                             ; exit program
 
-println:        ldy #0
-@loop:          lda (addrlo),y
-                sta STDIO
+println:        ldy #0                  ; loop over string pointed to by
+@loop:          lda (addrlo),y          ; addrlo + addrhi
                 beq @end                ; exit on termintal 0 
+                sta STDIO
                 iny
                 jmp @loop
                
