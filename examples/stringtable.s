@@ -17,21 +17,27 @@ addrhi:         .byte 0
                 stp
 
 strerror:       asl a
-                tax
+                cmp #(error_max-error_table)
+                bcc continue
+                lda #(error_max-error_table)
+
+continue:       tax
                 lda error_table,x
                 sta addrlo
                 inx
                 lda error_table, x
                 sta addrhi
+                jsr println
+                rts
 
-                ldy #0
-loop:           lda ($0),y
+println:        ldy #0
+@loop:          lda ($0),y
                 sta STDIO
-                beq end
+                beq @end
                 iny
-                jmp loop
+                jmp @loop
                
-end:            lda #$0d
+@end:           lda #$0d
                 sta STDIO
                 lda #$0a
                 sta STDIO
