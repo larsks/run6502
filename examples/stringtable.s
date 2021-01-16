@@ -25,20 +25,21 @@ addrhi:         .byte           0
 ;
 ; @param a -- error code
 ; @return none
-strerror:       asl                             ;multiply error code by two because
+strerror:       subroutine
+                asl                             ;multiply error code by two because
                                                 ;error_table consists of two-byte
                                                 ;entries
 
                 cmp             #(error_max-error_table)
                                                 ;make sure error code is one
                                                 ;we know about
-                bcc             continue        
+                bcc             .print
                 lda             #(error_max-error_table)
                                                 ;load last error message, which
                                                 ;should be the "invalid error
                                                 ;code" message
 
-continue:       tax                             ;move value to x register for indexing
+.print:         tax                             ;move value to x register for indexing
                 lda             error_table,x   ;load low byte of string address
                 sta             addrlo          
                 inx                             
@@ -54,14 +55,15 @@ continue:       tax                             ;move value to x register for in
 ; @param addrlo zero page location of low byte of string address
 ; @param addrhi zero page location of high byte of string address
 ; @return none
-println:        ldy             #0              
-@loop:          lda             (addrlo),y      
-                beq             @end            ;exit on termintal 0
+println:        subroutine
+                ldy             #0              
+.loop:          lda             (addrlo),y      
+                beq             .end            ;exit on termintal 0
                 sta             STDIO           
                 iny                             
-                jmp             @loop           
+                jmp             .loop           
 
-@end:           lda             #$0d            ;send <cr>
+.end:           lda             #$0d            ;send <cr>
                 sta             STDIO           
                 lda             #$0a            ;send <lf>
                 sta             STDIO           
