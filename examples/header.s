@@ -3,6 +3,12 @@
                 endm
 
                 ifnconst        NOHEADER
+
+                ; This describes the run6502 header, which is used both
+                ; to embed the start and load address into the final 
+                ; binary and also allows the kernel to recognize run6502
+                ; files.
+
                 seg             header          
                 org             $0              
 
