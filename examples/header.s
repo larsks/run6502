@@ -2,6 +2,10 @@
                 dc.b            $db
                 endm
 
+                ifnconst        STARTADDR
+STARTADDR       =               $200
+                endif
+
                 ifnconst        NOHEADER
 
                 ; This describes the run6502 header, which is used both
@@ -15,6 +19,6 @@
                 subroutine                      ; declare scope for local labels
 .start:         dc              "RN65"          ; run6502 signature
                 dc.w            .end-.start     ; load address
-                dc.w            $200            ; start address
+                dc.w            STARTADDR       ; start address
 .end:                                           
                 endif
