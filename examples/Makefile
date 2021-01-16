@@ -14,7 +14,7 @@ OBJS = $(SRCS:.s=.o)
 LSTS = $(SRCS:.s=.lst)
 
 %.bin: %.o
-	$(LD65) $(LD65FLAGS) -t none -o $@ $<
+	$(LD65) $(LD65FLAGS) --start-addr 0x200 -t none -o $@ $<
 
 %.r65: %.o header.o
 	$(LD65)  $(LD65FLAGS) -C run6502.cfg -o $@ header.o $<
