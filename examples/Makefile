@@ -12,14 +12,14 @@ SRCS = $(wildcard *.s)
 OBJS = $(SRCS:.s=.o)
 LSTS = $(SRCS:.s=.lst)
 
-%.bin: %.s
+%.bin: %.s header.s
 	$(DASM) $< -f3 -o$@ -l$(<:.s=.lst) -DNOHEADER
 
 %.r65: %.s header.s
-	$(DASM) $< -f3 -o$@ -l$(<:.s=.lst)
+	$(DASM) $< -f3 -o$@
 	chmod 755 $@
 
-all: $(PRGS)
+all: $(PRGS) $(BINS)
 
 clean:
 	rm -f $(PRGS) $(OBJS) $(LSTS) $(BINS)
