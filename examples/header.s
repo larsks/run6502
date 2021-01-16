@@ -1,14 +1,14 @@
-; This file describes the header used by run6502 to correctly
-; load and execute compiled 6502 binaries.
+                mac             stp
+                dc.b            $db
+                endm
 
-.segment "SIGNATURE"
+                ifnconst        NOHEADER
+                seg             header          
+                org             $0              
 
-        .byte "RN65"            ; embed signature into generated output
-
-.segment "LOADADDR"
-
-        .word *+4               ; embed load address
-
-.segment "STARTADDR"
-
-        .word *+2               ; embed start address
+                subroutine                      ; declare scope for local labels
+.start:         dc              "RN65"          ; run6502 signature
+                dc.w            .end-.start     ; load address
+                dc.w            $200            ; start address
+.end:                                           
+                endif

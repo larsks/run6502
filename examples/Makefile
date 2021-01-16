@@ -1,5 +1,4 @@
-LD65 = ld65
-CA65 = ca65
+DASM = dasm
 
 PRGS = \
        swapcase.r65 \
@@ -13,15 +12,12 @@ SRCS = $(wildcard *.s)
 OBJS = $(SRCS:.s=.o)
 LSTS = $(SRCS:.s=.lst)
 
-%.bin: %.o
-	$(LD65) $(LD65FLAGS) --start-addr 0x200 -t none -o $@ $<
+%.bin: %.s
+	$(DASM) $< -f3 -o$@ -l$(<:.s=.lst) -DNOHEADER
 
-%.r65: %.o header.o
-	$(LD65)  $(LD65FLAGS) -C run6502.cfg -o $@ header.o $<
+%.r65: %.s header.s
+	$(DASM) $< -f3 -o$@ -l$(<:.s=.lst)
 	chmod 755 $@
-
- %.o: %.s
-	$(CA65) $(CA65FLAGS) -t none -o $@ -l $(@:.o=.lst) $<
 
 all: $(PRGS)
 
