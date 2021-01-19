@@ -3,13 +3,8 @@
 STDIO           =               $f001
 ARGC            =               $f002
 
+                include         "zeropage.s"
                 include         "header.s"
-
-                seg.u           zeropage
-                org             $0
-
-addrlo:         .byte           0
-addrhi:         .byte           0
 
                 seg             text
                 org             $200
@@ -41,34 +36,14 @@ strerror:       subroutine
 
 .print:         tax                             ; move value to x register for indexing
                 lda             error_table,x   ; load low byte of string address
-                sta             addrlo
+                sta             strptr
                 inx
                 lda             error_table,x   ; load high byte of string address
-                sta             addrhi
+                sta             strptr + 1
                 jsr             println         ; print the error message
                 rts
 
-; @name println
-;
-; Print a string, terminiating it with <cr><lf>.
-;
-; @param addrlo zero page location of low byte of string address
-; @param addrhi zero page location of high byte of string address
-; @return none
-println:        subroutine
-                ldy             #0
-.loop:          lda             (addrlo),y
-                beq             .end            ; exit on termintal 0
-                sta             STDIO
-                iny
-                jmp             .loop
-
-.end:           lda             #$0d            ; send <cr>
-                sta             STDIO
-                lda             #$0a            ; send <lf>
-                sta             STDIO
-                lda             #0
-                rts
+                include         "println.s"
 
 error_table:    dc.w            error_0
                 dc.w            error_1
