@@ -1,12 +1,7 @@
-                processor       6502
+                .import         STDIO
 
-EXIT            =               $f000
-STDIO           =               $f001
-
-                include         "header.s"
-
-                seg             text
-                org             $200
+                .segment        "CODE"
+                .p816
 
 get_next_char:  lda             STDIO           ; get next character
                 bvs             end             ; exit on EOF
@@ -40,4 +35,4 @@ noswap:         sta             STDIO
 
 end:            stp
 
-last_was_eol:   ds.b            0
+last_was_eol:   .byte           0

@@ -11,4 +11,4 @@ for src in sys.argv[1:]:
             if mo := re_include.match(line):
                 inc.append(mo.group('include'))
 
-    print(f'{src.replace(".s", ".r65")} {src.replace(".s", ".bin")}: {src} {" ".join(inc)}')
+    print(f'{src.replace(".s", ".o")}: {src} {" ".join(inc)}')

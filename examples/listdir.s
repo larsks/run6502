@@ -1,17 +1,23 @@
-                seg             text
+                .import         DIROPT,DTYPE,STDIO,STRING_BASE
+                .import         println
+                .importzp       strptr
+
+                .export         listdir
+
+                .segment        "CODE"
 ; @name listdir
 ;
 ; Print out the type and name of items in a directory.
 ;
 ; @param STRING_BASE contains name of directory
-listdir:        subroutine
-                lda             #'L
+listdir:        .scope
+                lda             #'L'
                 sta             DIROPT          ; request directory listing
                 lda             DTYPE           ; read d_type of next entry
                                                 ; (places d_name into STRING_BASE)
-                beq             .end            ; exit if we have read last dir entry
+                beq             end             ; exit if we have read last dir entry
                 sta             STDIO           ; write dtype to stdout
-                lda             #'
+                lda             #' '
                 sta             STDIO
 
                 lda             #<STRING_BASE   ; load name into strptr
@@ -21,4 +27,5 @@ listdir:        subroutine
                 jsr             println         ; print name + eol
                 jmp             listdir
 
-.end:           rts
+end:            rts
+                .endscope

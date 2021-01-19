@@ -1,4 +1,5 @@
-                seg.u           zeropage
-                org             $0
+                .segment        "ZEROPAGE"
 
-strptr:         ds.b            1
+strptr:         .byte           0
+
+                .exportzp       strptr

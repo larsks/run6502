@@ -1,15 +1,6 @@
-                processor       6502
-
-EXIT            =               $f000
-STDIO           =               $f001
-ARGC            =               $f002
-ARGV            =               $f003
-ARGV_BASE       =               $f900
-
-                include         "header.s"
-
-                seg             text
-                org             $200
+                .import         ARGC,ARGV,STRING_BASE,STDIO
+                .segment        "CODE"
+                .p816
 
                 ldx             #0              ; start with argument 0
 
@@ -18,7 +9,7 @@ loop:           cpx             ARGC            ; check if there are any more ar
                 stx             ARGV            ; request the next argument
                 ldy             #0
 
-print:          lda             ARGV_BASE,y     ; read chars from argument
+print:          lda             STRING_BASE,y   ; read chars from argument
                 beq             next            ; break at end of string
                 sta             STDIO
                 iny                             ; increment string index

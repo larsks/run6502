@@ -1,24 +1,14 @@
-                mac             stp
-                dc.b            $db
-                endm
+; This file describes the header used by run6502 to correctly
+; load and execute compiled 6502 binaries.
 
-                ifnconst        STARTADDR
-STARTADDR       =               $200
-                endif
+.segment "SIGNATURE"
 
-                ifnconst        NOHEADER
+        .byte "RN65"            ; embed signature into generated output
 
-                                                ;  This describes the run6502 header, which is used both
-                                                ;  to embed the start and load address into the final
-                                                ;  binary and also allows the kernel to recognize run6502
-                                                ;  files.
+.segment "LOADADDR"
 
-                seg             header
-                org             $0
+        .word *+4               ; embed load address
 
-                subroutine                      ;  declare scope for local labels
-.start:         dc              "RN65"          ;  run6502 signature
-                dc.w            .end-.start     ;  load address
-                dc.w            STARTADDR       ;  start address
-.end:
-                endif
+.segment "STARTADDR"
+
+        .word *+2               ; embed start address
