@@ -1,8 +1,8 @@
                 .import         println
                 .importzp       strptr
- 
+
                 .export         strerror
- 
+
                 .segment        "CODE"
 ; @name strerror
 ;
@@ -18,7 +18,7 @@ strerror:       .scope
                 cmp             #(error_max-error_table)
                                                 ; make sure error code is one
                                                 ; we know about
-                bcc             print 
+                bcc             print
                 lda             #(error_max-error_table)
                                                 ; load last error message, which
                                                 ; should be the "invalid error

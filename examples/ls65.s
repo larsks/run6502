@@ -13,10 +13,10 @@ main:           .scope
                 lda             #'.'            ; default to listing '.' if no args
                 sta             STRING_BASE
                 dex                             ; inx at bottom of loop will set x=0
-                jmp             lbody 
+                jmp             lbody
 
 loop:           cpx             ARGC            ; check if there are any more arguments
-                beq             end 
+                beq             end
                 stx             ARGV            ; request the next argument
 
 lbody:          lda             #<STRING_BASE   ; load name into strptr
